@@ -17,7 +17,7 @@ Analyze this dataset:
 
 
         response = genai.generate(
-            model="Gemini 2.5 Flash TTS",
+            model="Gemini-2.5-flash",
             prompt=prompt
         )
         return response.output_text
