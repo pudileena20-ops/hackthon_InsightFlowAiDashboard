@@ -15,17 +15,12 @@ st.set_page_config(
 # ─── Dark Theme CSS ───────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Main background */
     .stApp { background-color: #0f1117; color: #e2e8f0; }
-
-    /* Sidebar */
     [data-testid="stSidebar"] {
         background-color: #161b27;
         border-right: 1px solid rgba(255,255,255,0.07);
     }
     [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
-
-    /* Metric cards */
     [data-testid="metric-container"] {
         background-color: #161b27;
         border: 1px solid rgba(255,255,255,0.07);
@@ -43,57 +38,37 @@ st.markdown("""
         font-size: 24px !important;
         font-weight: 500 !important;
     }
-
-    /* Headers */
     h1 { color: #a89ef8 !important; font-size: 22px !important; }
-    h2 { color: #e2e8f0 !important; font-size: 18px !important; }
-    h3 { color: #e2e8f0 !important; font-size: 16px !important; }
-
-    /* File uploader */
+    h2, h3 { color: #e2e8f0 !important; }
     [data-testid="stFileUploader"] {
         background-color: #161b27;
         border: 2px dashed rgba(124,110,247,0.3);
         border-radius: 12px;
         padding: 10px;
     }
-
-    /* Buttons */
     .stButton button {
-        background: linear-gradient(135deg, #7c6ef7, #f97316);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
+        background: linear-gradient(135deg, #1e5799, #38bdf8);
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 500 !important;
         width: 100%;
     }
-    .stButton button:hover { opacity: 0.9; }
-
-    /* Selectbox */
-    [data-testid="stSelectbox"] select,
-    .stSelectbox > div > div {
-        background-color: #161b27 !important;
-        color: #e2e8f0 !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 8px !important;
-    }
-
-    /* Dataframe */
+    .stButton button:hover { opacity: 0.9 !important; }
     [data-testid="stDataFrame"] {
         background-color: #161b27;
         border-radius: 10px;
     }
-
-    /* Cards */
     .insight-box {
-        background: rgba(124,110,247,0.07);
-        border: 1px solid rgba(124,110,247,0.25);
+        background: rgba(30,87,153,0.1);
+        border: 1px solid rgba(56,189,248,0.25);
         border-radius: 10px;
         padding: 16px 18px;
         margin: 10px 0;
     }
     .insight-label {
         font-size: 11px;
-        color: #a89ef8;
+        color: #38bdf8;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -113,15 +88,14 @@ st.markdown("""
         margin-top: 16px;
     }
     .success-box {
-        background: rgba(74,222,128,0.08);
-        border: 1px solid rgba(74,222,128,0.25);
+        background: rgba(56,189,248,0.08);
+        border: 1px solid rgba(56,189,248,0.25);
         border-radius: 8px;
         padding: 10px 14px;
-        color: #4ade80;
+        color: #38bdf8;
         font-size: 13px;
         margin-bottom: 16px;
     }
-    /* Hide default streamlit elements */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
@@ -133,11 +107,10 @@ try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except:
     api_key = os.environ.get("GEMINI_API_KEY", "")
-
 if api_key:
     genai.configure(api_key=api_key)
 
-# ─── Plotly dark theme ────────────────────────────────────────────────────────
+# ─── Chart Theme ──────────────────────────────────────────────────────────────
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="#161b27",
     plot_bgcolor="#161b27",
@@ -145,11 +118,20 @@ PLOTLY_LAYOUT = dict(
     xaxis=dict(gridcolor="rgba(255,255,255,0.05)", color="rgba(255,255,255,0.3)"),
     yaxis=dict(gridcolor="rgba(255,255,255,0.05)", color="rgba(255,255,255,0.3)"),
     margin=dict(l=10, r=10, t=40, b=10),
-    legend=dict(font=dict(color="rgba(255,255,255,0.4)"))
+    legend=dict(font=dict(color="rgba(255,255,255,0.5)"), bgcolor="rgba(0,0,0,0)")
 )
-BAR_COLORS  = ["#7c6ef7","#f97316","#a855f7","#fb923c","#9333ea","#fdba74"]
-PIE_COLORS  = ["#7c6ef7","#f97316","#a855f7","#fb923c","#9333ea","#fdba74"]
-LINE_COLOR  = "#f97316"
+
+# Blue gradient scale (dark to light blue - like screenshot)
+BLUE_SCALE = ["#1a3a6b", "#1e5799", "#2196c4", "#38bdf8", "#7dd3fc"]
+
+# Pie chart colors (purple + teal - like screenshot)
+PIE_COLORS = ["#4f46e5", "#0f6e56", "#38bdf8", "#7c6ef7", "#1D9E75", "#0ea5e9"]
+
+# Region bar colors
+REGION_COLORS = ["#1e5799", "#38bdf8", "#2196c4", "#7dd3fc"]
+
+# Line color
+LINE_COLOR = "#38bdf8"
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -170,7 +152,7 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-# ─── Main Content ─────────────────────────────────────────────────────────────
+# ─── Header ───────────────────────────────────────────────────────────────────
 st.markdown("# 📊 InsightFlow AI Dashboard")
 st.markdown("<div style='color:rgba(255,255,255,0.3);font-size:13px;margin-top:-10px;margin-bottom:20px;'>AI-powered data analytics — upload any CSV to get started</div>", unsafe_allow_html=True)
 
@@ -188,37 +170,36 @@ if uploaded_file:
     st.markdown(f"<div class='success-box'>✅ <b>{uploaded_file.name}</b> loaded — {len(df)} rows · {len(df.columns)} columns</div>", unsafe_allow_html=True)
 
     # ── Filters ──
-    with st.container():
-        fc1, fc2, fc3, fc4 = st.columns([2, 2, 1.5, 1.5])
-        with fc1:
-            if "region" in df.columns:
-                regions = ["All Regions"] + sorted(df["region"].dropna().unique().tolist())
-                region = st.selectbox("Region", regions)
-                if region != "All Regions":
-                    df = df[df["region"] == region]
-        with fc2:
-            if "category" in df.columns:
-                cats = ["All Categories"] + sorted(df["category"].dropna().unique().tolist())
-                category = st.selectbox("Category", cats)
-                if category != "All Categories":
-                    df = df[df["category"] == category]
-        with fc3:
-            start_date = st.date_input("From", value=None, label_visibility="visible")
-        with fc4:
-            end_date = st.date_input("To", value=None, label_visibility="visible")
+    fc1, fc2, fc3, fc4 = st.columns([2, 2, 1.5, 1.5])
+    with fc1:
+        if "region" in df.columns:
+            regions = ["All"] + sorted(df["region"].dropna().unique().tolist())
+            region = st.selectbox("Region", regions)
+            if region != "All":
+                df = df[df["region"] == region]
+    with fc2:
+        if "category" in df.columns:
+            cats = ["All"] + sorted(df["category"].dropna().unique().tolist())
+            category = st.selectbox("Category", cats)
+            if category != "All":
+                df = df[df["category"] == category]
+    with fc3:
+        start_date = st.date_input("From", value=None)
+    with fc4:
+        end_date = st.date_input("To", value=None)
 
-        if start_date and "order_date" in df.columns:
-            df = df[df["order_date"] >= pd.to_datetime(start_date)]
-        if end_date and "order_date" in df.columns:
-            df = df[df["order_date"] <= pd.to_datetime(end_date)]
+    if start_date and "order_date" in df.columns:
+        df = df[df["order_date"] >= pd.to_datetime(start_date)]
+    if end_date and "order_date" in df.columns:
+        df = df[df["order_date"] <= pd.to_datetime(end_date)]
 
     # ── Metrics ──
     st.markdown("<div class='section-label'>Summary</div>", unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Rows",    f"{len(df):,}")
-    m2.metric("Total Sales",   f"{df['sales'].sum():,.0f}"  if "sales"  in df.columns else "N/A")
-    m3.metric("Total Profit",  f"{df['profit'].sum():,.0f}" if "profit" in df.columns else "N/A")
-    m4.metric("Total Columns", len(df.columns))
+    m1.metric("Total Records", f"{len(df):,}")
+    m2.metric("Total Revenue",  f"${df['sales'].sum():,.2f}"  if "sales"  in df.columns else "N/A")
+    m3.metric("Avg Sale Value", f"${df['sales'].mean():,.2f}" if "sales"  in df.columns else "N/A")
+    m4.metric("Categories",     df["category"].nunique() if "category" in df.columns else len(df.columns))
 
     # ── AI Insight ──
     st.markdown("<div class='section-label'>AI Insight</div>", unsafe_allow_html=True)
@@ -227,18 +208,17 @@ if uploaded_file:
     if "ai_summary" not in st.session_state:
         st.session_state.ai_summary = "Click 'Generate Insights' to analyze your data."
 
-    col_ai1, col_ai2 = st.columns([5, 1])
-    with col_ai2:
-        if st.button("Generate Insights"):
+    _, btn_col = st.columns([5, 1])
+    with btn_col:
+        if st.button("✦ Generate"):
             with st.spinner("Analyzing..."):
                 try:
                     sample = df.head(10).fillna("N/A").to_string(index=False)
-                    prompt = f"""You are a data analyst. Analyze this sales dataset and provide 4 key insights in bullet points.
+                    prompt = f"""You are a data analyst. Analyze this dataset and provide 4 key insights in bullet points.
 Focus on trends, top performers, and recommendations.
-Dataset sample:
-{sample}
-Total rows: {len(df)}
-Keep insights short and actionable."""
+Dataset: {sample}
+Rows: {len(df)}
+Keep it short and actionable."""
                     model = genai.GenerativeModel("gemini-2.0-flash")
                     response = model.generate_content(prompt)
                     st.session_state.ai_summary = response.text
@@ -247,63 +227,81 @@ Keep insights short and actionable."""
 
     ai_placeholder.markdown(f"""
     <div class='insight-box'>
-        <div class='insight-label'>✦ AI Insight — Gemini 2.0</div>
+        <div class='insight-label'>✦ AI Insight — Gemini 2.0 Flash</div>
         <div class='insight-text'>{st.session_state.ai_summary}</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Charts Row 1 ──
+    # ── Charts Row 1: Top 5 Products + Revenue by Category ──
     st.markdown("<div class='section-label'>Charts</div>", unsafe_allow_html=True)
-    ch1, ch2 = st.columns([2, 1])
+    ch1, ch2 = st.columns(2)
+
     with ch1:
-        if "region" in df.columns and "sales" in df.columns:
-            sbr = df.groupby("region")["sales"].sum().reset_index()
-            fig = px.bar(sbr, x="region", y="sales", title="Sales by Region",
-                        color="region", color_discrete_sequence=BAR_COLORS)
+        product_col = next((c for c in ["product_name","product","item","name"] if c in df.columns), None)
+        sales_col   = next((c for c in ["sales","revenue","amount","total"] if c in df.columns), None)
+        if product_col and sales_col:
+            top5 = df.groupby(product_col)[sales_col].sum().nlargest(5).reset_index()
+            fig = px.bar(
+                top5, x=sales_col, y=product_col,
+                orientation="h",
+                title="🧊 Top 5 Products by Revenue",
+                color=sales_col,
+                color_continuous_scale=BLUE_SCALE
+            )
             fig.update_layout(**PLOTLY_LAYOUT)
-            fig.update_traces(marker_line_width=0, width=0.5)
-            st.plotly_chart(fig, use_container_width=True)
-    with ch2:
-        if "category" in df.columns and "profit" in df.columns:
-            pbc = df.groupby("category")["profit"].sum().reset_index()
-            fig = px.pie(pbc, names="category", values="profit",
-                        title="Profit by Category",
-                        color_discrete_sequence=PIE_COLORS,
-                        hole=0.4)
-            fig.update_layout(**PLOTLY_LAYOUT)
+            fig.update_layout(coloraxis_showscale=True,
+                            coloraxis_colorbar=dict(
+                                tickfont=dict(color="rgba(255,255,255,0.4)"),
+                                title=dict(font=dict(color="rgba(255,255,255,0.4)"))
+                            ))
             st.plotly_chart(fig, use_container_width=True)
 
-    # ── Charts Row 2 ──
+    with ch2:
+        if "category" in df.columns and sales_col:
+            pbc = df.groupby("category")[sales_col].sum().reset_index()
+            fig = px.pie(
+                pbc, names="category", values=sales_col,
+                title="🟡 Revenue by Category",
+                color_discrete_sequence=PIE_COLORS,
+                hole=0.4
+            )
+            fig.update_layout(**PLOTLY_LAYOUT)
+            fig.update_traces(textfont_color="white", textfont_size=12)
+            st.plotly_chart(fig, use_container_width=True)
+
+    # ── Charts Row 2: Sales by Region + Trend ──
     ch3, ch4 = st.columns(2)
+
     with ch3:
-        if "order_date" in df.columns and "sales" in df.columns:
-            trend = df.groupby(df["order_date"].dt.date)["sales"].sum().reset_index()
-            fig = px.line(trend, x="order_date", y="sales",
-                         title="Sales Trend Over Time",
-                         color_discrete_sequence=[LINE_COLOR])
+        if "region" in df.columns and sales_col:
+            sbr = df.groupby("region")[sales_col].sum().reset_index()
+            fig = px.bar(
+                sbr, x="region", y=sales_col,
+                title="📊 Sales by Region",
+                color="region",
+                color_discrete_sequence=REGION_COLORS
+            )
+            fig.update_layout(**PLOTLY_LAYOUT)
+            fig.update_traces(marker_line_width=0)
+            st.plotly_chart(fig, use_container_width=True)
+
+    with ch4:
+        if "order_date" in df.columns and sales_col:
+            trend = df.groupby(df["order_date"].dt.date)[sales_col].sum().reset_index()
+            fig = px.line(
+                trend, x="order_date", y=sales_col,
+                title="📈 Sales Trend Over Time",
+                color_discrete_sequence=[LINE_COLOR]
+            )
             fig.update_layout(**PLOTLY_LAYOUT)
             fig.update_traces(line_width=2)
-            st.plotly_chart(fig, use_container_width=True)
-    with ch4:
-        product_col = next((c for c in ["product_name","product","item","name"] if c in df.columns), None)
-        if product_col and "sales" in df.columns:
-            top5 = df.groupby(product_col)["sales"].sum().nlargest(5).reset_index()
-            fig = px.bar(top5, x="sales", y=product_col,
-                        orientation="h", title="Top 5 Products",
-                        color_discrete_sequence=["#7c6ef7"])
-            fig.update_layout(**PLOTLY_LAYOUT)
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Data Table ──
     st.markdown("<div class='section-label'>Data Preview</div>", unsafe_allow_html=True)
-    st.dataframe(
-        df.head(10),
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(df.head(10), use_container_width=True, hide_index=True)
 
 else:
-    # No file uploaded state
     st.markdown("""
     <div style='text-align:center;padding:80px 20px;'>
         <div style='font-size:48px;margin-bottom:16px;'>📂</div>
