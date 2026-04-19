@@ -1,6 +1,7 @@
 streamlit
 flask
 pandas
+flask-login
 numpy
 plotly
 google-generativeai
