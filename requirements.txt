@@ -3,5 +3,6 @@ flask
 pandas
 flask-login
 numpy
+pyodbc
 plotly
 google-generativeai
