@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import google.generativeai as genai
 import os
 
@@ -12,93 +11,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ─── Dark Theme CSS ───────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     .stApp { background-color: #0f1117; color: #e2e8f0; }
-
-    [data-testid="stSidebar"] {
-        background-color: #161b27;
-        border-right: 1px solid rgba(255,255,255,0.07);
-    }
+    [data-testid="stSidebar"] { background-color: #161b27; border-right: 1px solid rgba(255,255,255,0.07); }
     [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
-
-    /* Fix white metric boxes */
-    [data-testid="metric-container"],
-    div[data-testid="stMetric"] {
-        background-color: #161b27 !important;
-        border: 1px solid rgba(255,255,255,0.07) !important;
-        border-radius: 10px !important;
-        padding: 16px !important;
-    }
+    div[data-testid="stMetric"] { background-color: #161b27 !important; border: 1px solid rgba(255,255,255,0.07) !important; border-radius: 10px !important; padding: 16px !important; }
     div[data-testid="stMetricValue"] > div { color: #e2e8f0 !important; }
     div[data-testid="stMetricLabel"] > div { color: rgba(255,255,255,0.4) !important; }
-    [data-testid="stMetricValue"] { color: #e2e8f0 !important; font-size: 24px !important; font-weight: 500 !important; }
-    [data-testid="stMetricLabel"] { color: rgba(255,255,255,0.4) !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.1em; }
-
-    h1 { color: #a89ef8 !important; font-size: 22px !important; }
+    h1 { color: #a89ef8 !important; }
     h2, h3 { color: #e2e8f0 !important; }
-
-    [data-testid="stFileUploader"] {
-        background-color: #161b27;
-        border: 2px dashed rgba(124,110,247,0.3);
-        border-radius: 12px;
-        padding: 10px;
-    }
-
-    .stButton button {
-        background: linear-gradient(135deg, #1e5799, #38bdf8) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        width: 100%;
-    }
-    .stButton button:hover { opacity: 0.9 !important; }
-
-    [data-testid="stDataFrame"] {
-        background-color: #161b27;
-        border-radius: 10px;
-    }
-
-    .insight-box {
-        background: rgba(30,87,153,0.1);
-        border: 1px solid rgba(56,189,248,0.25);
-        border-radius: 10px;
-        padding: 16px 18px;
-        margin: 10px 0;
-    }
-    .insight-label {
-        font-size: 11px;
-        color: #38bdf8;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 8px;
-    }
-    .insight-text {
-        font-size: 13px;
-        color: rgba(255,255,255,0.65);
-        line-height: 1.7;
-        white-space: pre-line;
-    }
-    .section-label {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: rgba(255,255,255,0.2);
-        margin-bottom: 8px;
-        margin-top: 16px;
-    }
-    .success-box {
-        background: rgba(56,189,248,0.08);
-        border: 1px solid rgba(56,189,248,0.25);
-        border-radius: 8px;
-        padding: 10px 14px;
-        color: #38bdf8;
-        font-size: 13px;
-        margin-bottom: 16px;
-    }
+    [data-testid="stFileUploader"] { background-color: #161b27; border: 2px dashed rgba(124,110,247,0.3); border-radius: 12px; padding: 10px; }
+    .stButton button { background: linear-gradient(135deg, #1e5799, #38bdf8) !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important; }
+    [data-testid="stDataFrame"] { background-color: #161b27; border-radius: 10px; }
+    .insight-box { background: rgba(30,87,153,0.1); border: 1px solid rgba(56,189,248,0.25); border-radius: 10px; padding: 16px 18px; margin: 10px 0; }
+    .insight-label { font-size: 11px; color: #38bdf8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .insight-text { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; white-space: pre-line; }
+    .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.2); margin-bottom: 8px; margin-top: 16px; }
+    .success-box { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 8px; padding: 10px 14px; color: #38bdf8; font-size: 13px; margin-bottom: 16px; }
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
@@ -106,14 +36,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── Gemini Setup ─────────────────────────────────────────────────────────────
+GEMINI_API_KEY = ""
 try:
-    api_key = st.secrets["GEMINI_API_KEY"]
+    GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 except:
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-if api_key:
-    genai.configure(api_key=api_key)
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
-# ─── Chart Theme ──────────────────────────────────────────────────────────────
+# ─── Chart Colors ─────────────────────────────────────────────────────────────
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="#161b27",
     plot_bgcolor="#161b27",
@@ -123,17 +52,9 @@ PLOTLY_LAYOUT = dict(
     margin=dict(l=10, r=10, t=40, b=10),
     legend=dict(font=dict(color="rgba(255,255,255,0.5)"), bgcolor="rgba(0,0,0,0)")
 )
-
-# Blue gradient (dark to light) for bar charts
 BLUE_SCALE    = ["#1a3a6b", "#1e5799", "#2196c4", "#38bdf8", "#7dd3fc"]
-
-# Violet gradient for pie chart
-VIOLET_SCALE  = ["#2e1065", "#4c1d95", "#6d28d9", "#7c3aed", "#8b5cf6",
-                 "#a78bfa", "#c4b5fd", "#ddd6fe"]
-
-# Region bar colors (blue shades)
+VIOLET_SCALE  = ["#2e1065", "#4c1d95", "#6d28d9", "#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd", "#ddd6fe"]
 REGION_COLORS = ["#1e5799", "#38bdf8", "#2196c4", "#7dd3fc"]
-
 LINE_COLOR    = "#38bdf8"
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -150,18 +71,11 @@ with st.sidebar:
     st.markdown("📁 Datasets")
     st.markdown("🕓 History")
     st.markdown("---")
-    st.markdown(
-        "<div style='color:rgba(255,255,255,0.2);font-size:11px;'>© 2026 InsightFlow v2.0</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("<div style='color:rgba(255,255,255,0.2);font-size:11px;'>© 2026 InsightFlow v2.0</div>", unsafe_allow_html=True)
 
 # ─── Header ───────────────────────────────────────────────────────────────────
 st.markdown("# 📊 InsightFlow AI Dashboard")
-st.markdown(
-    "<div style='color:rgba(255,255,255,0.3);font-size:13px;margin-top:-10px;margin-bottom:20px;'>"
-    "AI-powered data analytics — upload any CSV to get started</div>",
-    unsafe_allow_html=True
-)
+st.markdown("<div style='color:rgba(255,255,255,0.3);font-size:13px;margin-top:-10px;margin-bottom:20px;'>AI-powered data analytics — upload any CSV to get started</div>", unsafe_allow_html=True)
 
 # ─── Upload ───────────────────────────────────────────────────────────────────
 uploaded_file = st.file_uploader("", type=["csv"], label_visibility="collapsed")
@@ -174,10 +88,7 @@ if uploaded_file:
     if "profit" not in df.columns and "sales" in df.columns:
         df["profit"] = (df["sales"] * 0.2).round(2)
 
-    st.markdown(
-        f"<div class='success-box'>✅ <b>{uploaded_file.name}</b> — {len(df)} rows · {len(df.columns)} columns</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<div class='success-box'>✅ <b>{uploaded_file.name}</b> — {len(df)} rows · {len(df.columns)} columns</div>", unsafe_allow_html=True)
 
     # ── Detect columns ──
     sales_col   = next((c for c in ["sales","revenue","amount","total"] if c in df.columns), None)
@@ -224,21 +135,29 @@ if uploaded_file:
 
     _, btn_col = st.columns([5, 1])
     with btn_col:
-        if st.button("✦ Generate"):
-            with st.spinner("Analyzing..."):
+        generate = st.button("✦ Generate")
+
+    if generate:
+        if not GEMINI_API_KEY:
+            st.session_state.ai_summary = "❌ Gemini API key not found. Add GEMINI_API_KEY in Streamlit secrets."
+        else:
+            with st.spinner("Analyzing your data..."):
                 try:
+                    genai.configure(api_key=GEMINI_API_KEY)
                     sample = df.head(10).fillna("N/A").to_string(index=False)
                     prompt = f"""You are a data analyst. Analyze this dataset and provide 4 key insights in bullet points.
-Focus on trends, top performers, and recommendations.
+Focus on trends, top performers, and actionable recommendations.
+
 Dataset sample:
 {sample}
+
 Total rows: {len(df)}
-Keep it short and actionable."""
+Keep insights short and actionable."""
                     model = genai.GenerativeModel("gemini-2.0-flash")
                     response = model.generate_content(prompt)
                     st.session_state.ai_summary = response.text
                 except Exception as e:
-                    st.session_state.ai_summary = f"Error: {e}"
+                    st.session_state.ai_summary = f"❌ AI Error: {str(e)}"
 
     ai_placeholder.markdown(f"""
     <div class='insight-box'>
@@ -253,16 +172,25 @@ Keep it short and actionable."""
 
     with ch1:
         if product_col and sales_col:
-            top_products = df.groupby(product_col)[sales_col].sum().nlargest(50).reset_index()
+            # Show ALL products sorted by sales
+            all_products = (
+                df.groupby(product_col)[sales_col]
+                .sum()
+                .reset_index()
+                .sort_values(sales_col, ascending=True)
+            )
             fig = px.bar(
-                top_products, x=sales_col, y=product_col,
+                all_products,
+                x=sales_col,
+                y=product_col,
                 orientation="h",
-                title="🧊 Top 10 Products by Revenue",
+                title=f"🧊 All Products by Revenue ({len(all_products)} products)",
                 color=sales_col,
                 color_continuous_scale=BLUE_SCALE
             )
             fig.update_layout(**PLOTLY_LAYOUT)
             fig.update_layout(
+                height=max(400, len(all_products) * 25),
                 coloraxis_colorbar=dict(
                     tickfont=dict(color="rgba(255,255,255,0.4)"),
                     title=dict(font=dict(color="rgba(255,255,255,0.4)"), text="Sales")
@@ -273,11 +201,12 @@ Keep it short and actionable."""
     with ch2:
         if "category" in df.columns and sales_col:
             pbc = df.groupby("category")[sales_col].sum().reset_index()
-            # Build violet gradient colors based on number of categories
             n = len(pbc)
-            violet_colors = VIOLET_SCALE[:n] if n <= len(VIOLET_SCALE) else VIOLET_SCALE * (n // len(VIOLET_SCALE) + 1)
+            violet_colors = (VIOLET_SCALE * ((n // len(VIOLET_SCALE)) + 1))[:n]
             fig = px.pie(
-                pbc, names="category", values=sales_col,
+                pbc,
+                names="category",
+                values=sales_col,
                 title="🟣 Revenue by Category",
                 color_discrete_sequence=violet_colors,
                 hole=0.4
@@ -326,11 +255,7 @@ else:
     st.markdown("""
     <div style='text-align:center;padding:80px 20px;'>
         <div style='font-size:48px;margin-bottom:16px;'>📂</div>
-        <div style='font-size:16px;color:rgba(255,255,255,0.4);margin-bottom:8px;'>
-            Upload a CSV file to get started
-        </div>
-        <div style='font-size:13px;color:rgba(255,255,255,0.2);'>
-            Any CSV dataset works — sales, finance, marketing, HR and more
-        </div>
+        <div style='font-size:16px;color:rgba(255,255,255,0.4);margin-bottom:8px;'>Upload a CSV file to get started</div>
+        <div style='font-size:13px;color:rgba(255,255,255,0.2);'>Any CSV dataset works — sales, finance, marketing, HR and more</div>
     </div>
     """, unsafe_allow_html=True)
