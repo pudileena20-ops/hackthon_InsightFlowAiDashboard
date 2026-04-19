@@ -1,134 +1,76 @@
-from flask import Flask, render_template, request, redirect, url_for
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from services.db_service import fetch_table_data
-from services.gemini_service import generate_summary
-import json
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import google.generativeai as genai
+import os
 
-app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Change this in production
+st.set_page_config(page_title="InsightFlow AI", layout="wide", page_icon="📊")
 
-# ----------------- Login Setup -----------------
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except:
+    api_key = os.environ.get("GEMINI_API_KEY", "")
 
-class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
-        self.username = "Leenaa"
-        self.password = "76800"
+genai.configure(api_key=api_key)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
+st.title("📊 InsightFlow AI Dashboard")
+uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    if "profit" not in df.columns and "sales" in df.columns:
+        df["profit"] = (df["sales"] * 0.2).round(2)
 
-        if username == "Leenaa" and password == "76800":
-            user = User(id=1)
-            login_user(user)
-            return redirect(url_for("home"))
-        else:
-            return render_template("login.html", error="Invalid username or password")
+    st.success(f"✅ {len(df)} rows loaded!")
 
-    return render_template("login.html")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Total Rows", len(df))
+    m2.metric("Total Sales", f"{df['sales'].sum():,.0f}" if "sales" in df.columns else "N/A")
+    m3.metric("Total Profit", f"{df['profit'].sum():,.0f}" if "profit" in df.columns else "N/A")
+    m4.metric("Total Columns", len(df.columns))
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("login"))
+    col1, col2 = st.columns(2)
+    with col1:
+        if "region" in df.columns and "sales" in df.columns:
+            fig = px.bar(df.groupby("region")["sales"].sum().reset_index(),
+                x="region", y="sales", title="Sales by Region",
+                color_discrete_sequence=["#7c6ef7","#f97316","#a855f7","#fb923c"])
+            st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        if "category" in df.columns and "profit" in df.columns:
+            fig = px.pie(df.groupby("category")["profit"].sum().reset_index(),
+                names="category", values="profit", title="Profit by Category",
+                color_discrete_sequence=["#7c6ef7","#f97316","#a855f7","#fb923c"])
+            st.plotly_chart(fig, use_container_width=True)
 
-# ----------------- Home / Dashboard -----------------
-@app.route("/")
-@login_required
-def home():
-    selected_region = request.args.get("region", "")
-    selected_category = request.args.get("category", "")
+    if "order_date" in df.columns and "sales" in df.columns:
+        df["order_date"] = pd.to_datetime(df["order_date"], errors="coerce")
+        trend = df.groupby(df["order_date"].dt.date)["sales"].sum().reset_index()
+        fig = px.line(trend, x="order_date", y="sales", title="Sales Trend",
+            color_discrete_sequence=["#f97316"])
+        st.plotly_chart(fig, use_container_width=True)
 
-    df = fetch_table_data()
+    product_col = next((c for c in ["product_name","product","item","name"] if c in df.columns), None)
+    if product_col and "sales" in df.columns:
+        top5 = df.groupby(product_col)["sales"].sum().nlargest(5).reset_index()
+        fig = px.bar(top5, x="sales", y=product_col, orientation="h",
+            title="Top 5 Products", color_discrete_sequence=["#7c6ef7"])
+        st.plotly_chart(fig, use_container_width=True)
 
-    # ----------------- Filters -----------------
-    if not df.empty:
-        df.columns = df.columns.str.lower().str.strip()
-        region_options = sorted(df["region"].dropna().unique().tolist()) if "region" in df.columns else []
-        category_options = sorted(df["category"].dropna().unique().tolist()) if "category" in df.columns else []
+    st.subheader("🤖 AI Insight")
+    if st.button("Generate Insights"):
+        with st.spinner("Analyzing..."):
+            try:
+                sample = df.head(10).fillna("N/A").to_string(index=False)
+                model = genai.GenerativeModel("gemini-2.0-flash")
+                response = model.generate_content(f"Analyze this data and give 4 insights:\n{sample}")
+                st.success(response.text)
+            except Exception as e:
+                st.error(f"Error: {e}")
 
-        if selected_region:
-            df = df[df["region"] == selected_region]
-        if selected_category:
-            df = df[df["category"] == selected_category]
-    else:
-        region_options = []
-        category_options = []
+    st.subheader("📋 Data Preview")
+    st.dataframe(df.head(10), use_container_width=True)
 
-    # ----------------- Metrics -----------------
-    total_rows = len(df)
-    total_columns = len(df.columns)
-    total_sales = round(float(df["sales"].sum()), 2) if "sales" in df.columns else 0
-    total_profit = round(float(df["profit"].sum()), 2) if "profit" in df.columns else 0
-
-    table_data = df.to_dict(orient="records") if not df.empty else []
-    columns = df.columns.tolist() if not df.empty else []
-
-    # ----------------- Charts -----------------
-    if not df.empty and "region" in df.columns:
-        region_group = df.groupby("region")["sales"].sum()
-        region_labels = json.dumps(list(region_group.index))
-        region_values = json.dumps(list(region_group.values))
-    else:
-        region_labels = json.dumps([])
-        region_values = json.dumps([])
-
-    if not df.empty and "category" in df.columns:
-        category_group = df.groupby("category")["profit"].sum()
-        category_labels = json.dumps(list(category_group.index))
-        category_values = json.dumps(list(category_group.values))
-    else:
-        category_labels = json.dumps([])
-        category_values = json.dumps([])
-
-    # ----------------- AI Summary -----------------
-    try:
-        ai_summary = generate_summary(df)
-    except Exception as e:
-        print("AI summary error:", e)
-        # Fallback local summary
-        if not df.empty:
-            total_sales_val = df["sales"].sum() if "sales" in df.columns else 0
-            total_profit_val = df["profit"].sum() if "profit" in df.columns else 0
-            regions_val = ", ".join(df["region"].unique()) if "region" in df.columns else "N/A"
-            categories_val = ", ".join(df["category"].unique()) if "category" in df.columns else "N/A"
-            ai_summary = (
-                f"[Fallback] Total Sales: {total_sales_val}, Total Profit: {total_profit_val}, "
-                f"Regions: {regions_val}, Categories: {categories_val}"
-            )
-        else:
-            ai_summary = "No data available for AI summary."
-
-    # ----------------- Render -----------------
-    return render_template(
-        "dashboard.html",
-        total_rows=total_rows,
-        total_columns=total_columns,
-        total_sales=total_sales,
-        total_profit=total_profit,
-        columns=columns,
-        table_data=table_data,
-        region_labels=region_labels,
-        region_values=region_values,
-        category_labels=category_labels,
-        category_values=category_values,
-        ai_summary=ai_summary,
-        region_options=region_options,
-        category_options=category_options,
-        selected_region=selected_region,
-        selected_category=selected_category
-    )
-
-if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+else:
+    st.info("👆 Upload a CSV file to get started!")
