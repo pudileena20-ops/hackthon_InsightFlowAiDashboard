@@ -1,4 +1,5 @@
-flask
+streamlit
 pandas
-pyodbc
-SQL Server
+numpy
+plotly
+google-generativeai
