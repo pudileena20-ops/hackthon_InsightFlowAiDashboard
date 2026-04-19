@@ -5,4 +5,5 @@ flask-login
 numpy
 pyodbc
 plotly
+python-dotenv
 google-generativeai
