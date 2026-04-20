@@ -325,7 +325,7 @@ Keep each insight short and actionable."""
                 color_continuous_scale=BLUE_SCALE
             )
             fig.update_layout(**PLOTLY_LAYOUT)
-            fig.update_layout(height=max(400, len(all_products) * 28))
+            fig.update_layout(height=400)
             st.plotly_chart(fig, use_container_width=True)
 
     with ch2:
