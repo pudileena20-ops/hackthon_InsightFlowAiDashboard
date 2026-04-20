@@ -1,0 +1,1 @@
+nsightFlow is an AI-powered data analytics dashboard built with Python and Streamlit. It allows users to upload any CSV dataset and instantly get interactive visualizations, key metrics, and AI-generated insights using Google Gemini 2.0 Flash.
