@@ -22,15 +22,126 @@ st.markdown("""
     h1 { color: #a89ef8 !important; }
     h2, h3 { color: #e2e8f0 !important; }
     [data-testid="stFileUploader"] { background-color: #161b27; border: 2px dashed rgba(124,110,247,0.3); border-radius: 12px; padding: 10px; }
-    .stButton button { background: linear-gradient(135deg, #1e5799, #38bdf8) !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 500 !important; }
-    .stButton button:hover { opacity: 0.9 !important; }
     [data-testid="stDataFrame"] { background-color: #161b27 !important; border-radius: 10px; }
+
+    /* Colored filter buttons */
+    div[data-testid="stSelectbox"] > div > div {
+        background-color: #1e3a5f !important;
+        border: 1px solid #38bdf8 !important;
+        border-radius: 8px !important;
+        color: #38bdf8 !important;
+    }
+    div[data-testid="stSelectbox"] label {
+        color: #38bdf8 !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+    }
+    div[data-testid="stDateInput"] > div > div {
+        background-color: #1e1065 !important;
+        border: 1px solid #a78bfa !important;
+        border-radius: 8px !important;
+        color: #a78bfa !important;
+    }
+    div[data-testid="stDateInput"] label {
+        color: #a78bfa !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+    }
+
+    /* Apply button - green */
+    div[data-testid="stButton"]:nth-of-type(1) button {
+        background: linear-gradient(135deg, #065f46, #10b981) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        padding: 10px 20px !important;
+        width: 100% !important;
+    }
+
+    /* Reset button - red */
+    div[data-testid="stButton"]:nth-of-type(2) button {
+        background: linear-gradient(135deg, #7f1d1d, #ef4444) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        padding: 10px 20px !important;
+        width: 100% !important;
+    }
+
+    /* AI button - purple */
+    .stButton button {
+        background: linear-gradient(135deg, #4c1d95, #7c3aed) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+    .stButton button:hover { opacity: 0.9 !important; transform: translateY(-1px); }
+
+    /* Download button - blue */
+    [data-testid="stDownloadButton"] button {
+        background: linear-gradient(135deg, #1e5799, #38bdf8) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        width: 100% !important;
+    }
+
+    /* Search box */
+    [data-testid="stTextInput"] input {
+        background-color: #161b27 !important;
+        border: 1px solid rgba(56,189,248,0.3) !important;
+        border-radius: 8px !important;
+        color: #e2e8f0 !important;
+    }
+    [data-testid="stTextInput"] input:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 2px rgba(56,189,248,0.15) !important;
+    }
+
     .insight-box { background: rgba(30,87,153,0.1); border: 1px solid rgba(56,189,248,0.25); border-radius: 10px; padding: 16px 18px; margin: 10px 0; }
     .insight-label { font-size: 11px; color: #38bdf8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
     .insight-text { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; white-space: pre-line; }
     .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.2); margin-bottom: 8px; margin-top: 16px; }
     .success-box { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 8px; padding: 10px 14px; color: #38bdf8; font-size: 13px; margin-bottom: 16px; }
-    .filter-box { background: #161b27; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 16px 18px; margin-bottom: 20px; }
+
+    /* Filter container */
+    .filter-container {
+        background: #161b27;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    .filter-title {
+        font-size: 11px;
+        color: rgba(255,255,255,0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 12px;
+    }
+
+    /* Active filter badges */
+    .badge {
+        display: inline-block;
+        background: rgba(56,189,248,0.15);
+        border: 1px solid rgba(56,189,248,0.3);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        color: #38bdf8;
+        margin-right: 6px;
+    }
+
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
@@ -97,66 +208,64 @@ if uploaded_file:
     product_col = next((c for c in ["product_name","product","item","name"] if c in df_original.columns), None)
 
     # ─── Filters ──────────────────────────────────────────────────────────────
-    st.markdown("<div class='section-label'>Filters</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-label'>🎛️ Filters</div>", unsafe_allow_html=True)
 
-    with st.container():
-        f1, f2, f3, f4, f5 = st.columns([2, 2, 2, 2, 1])
+    f1, f2, f3, f4, f5, f6 = st.columns([2, 2, 1.5, 1.5, 1, 1])
 
-        with f1:
-            region_options = ["All Regions"]
-            if "region" in df_original.columns:
-                region_options += sorted(df_original["region"].dropna().unique().tolist())
-            selected_region = st.selectbox("🌍 Region", region_options)
+    with f1:
+        region_options = ["All Regions"]
+        if "region" in df_original.columns:
+            region_options += sorted(df_original["region"].dropna().unique().tolist())
+        selected_region = st.selectbox("🌍 Region", region_options)
 
-        with f2:
-            category_options = ["All Categories"]
-            if "category" in df_original.columns:
-                category_options += sorted(df_original["category"].dropna().unique().tolist())
-            selected_category = st.selectbox("📦 Category", category_options)
+    with f2:
+        category_options = ["All Categories"]
+        if "category" in df_original.columns:
+            category_options += sorted(df_original["category"].dropna().unique().tolist())
+        selected_category = st.selectbox("📦 Category", category_options)
 
-        with f3:
-            start_date = st.date_input("📅 From Date", value=None)
+    with f3:
+        start_date = st.date_input("📅 From", value=None)
 
-        with f4:
-            end_date = st.date_input("📅 To Date", value=None)
+    with f4:
+        end_date = st.date_input("📅 To", value=None)
 
-        with f5:
-            st.markdown("<br>", unsafe_allow_html=True)
-            apply = st.button("✅ Apply")
-            reset = st.button("🔄 Reset")
+    with f5:
+        st.markdown("<br>", unsafe_allow_html=True)
+        apply = st.button("✅ Apply")
+
+    with f6:
+        st.markdown("<br>", unsafe_allow_html=True)
+        reset = st.button("🔄 Reset")
 
     # ── Apply Filters ──
     if reset:
-        selected_region   = "All Regions"
-        selected_category = "All Categories"
-        start_date        = None
-        end_date          = None
+        st.rerun()
 
     df = df_original.copy()
 
     if selected_region != "All Regions" and "region" in df.columns:
         df = df[df["region"] == selected_region]
-
     if selected_category != "All Categories" and "category" in df.columns:
         df = df[df["category"] == selected_category]
-
     if start_date and "order_date" in df.columns:
         df = df[df["order_date"] >= pd.to_datetime(start_date)]
-
     if end_date and "order_date" in df.columns:
         df = df[df["order_date"] <= pd.to_datetime(end_date)]
 
-    # Show active filters
+    # Active filter badges
     active = []
-    if selected_region   != "All Regions":   active.append(f"Region: {selected_region}")
-    if selected_category != "All Categories": active.append(f"Category: {selected_category}")
-    if start_date: active.append(f"From: {start_date}")
-    if end_date:   active.append(f"To: {end_date}")
+    if selected_region   != "All Regions":   active.append(f"🌍 {selected_region}")
+    if selected_category != "All Categories": active.append(f"📦 {selected_category}")
+    if start_date: active.append(f"📅 From {start_date}")
+    if end_date:   active.append(f"📅 To {end_date}")
+
     if active:
-        st.info(f"🔍 Active filters: {' | '.join(active)} — {len(df)} rows")
+        badges = "".join([f"<span class='badge'>{a}</span>" for a in active])
+        st.markdown(f"<div style='margin-bottom:12px;'>🔍 Active: {badges} &nbsp; <span style='color:rgba(255,255,255,0.3);font-size:12px;'>{len(df)} rows</span></div>", unsafe_allow_html=True)
 
     # ── Metrics ──
-    st.markdown("<div class='section-label'>Summary</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-label'>📊 Summary</div>", unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Total Records",  f"{len(df):,}")
     m2.metric("Total Sales",    f"${df[sales_col].sum():,.2f}"  if sales_col else "N/A")
@@ -164,31 +273,26 @@ if uploaded_file:
     m4.metric("Categories",     df["category"].nunique() if "category" in df.columns else "N/A")
 
     # ── AI Insight ──
-    st.markdown("<div class='section-label'>AI Insight</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-label'>🤖 AI Insight</div>", unsafe_allow_html=True)
     ai_placeholder = st.empty()
 
     if "ai_summary" not in st.session_state:
-        st.session_state.ai_summary = "Click 'Generate Insights' to analyze your data with Gemini AI."
+        st.session_state.ai_summary = "Click 'Generate AI Insights' to analyze your data."
 
     if st.button("🤖 Generate AI Insights"):
         if not GEMINI_API_KEY:
-            st.session_state.ai_summary = "❌ Gemini API key not found. Please add GEMINI_API_KEY in Streamlit secrets settings."
+            st.session_state.ai_summary = "❌ API key missing. Add GEMINI_API_KEY in Streamlit secrets."
         else:
-            with st.spinner("🔍 Analyzing your data with Gemini AI..."):
+            with st.spinner("🔍 Gemini is analyzing your data..."):
                 try:
                     genai.configure(api_key=GEMINI_API_KEY)
                     sample = df.head(15).fillna("N/A").to_string(index=False)
-                    prompt = f"""You are a senior data analyst. Analyze this sales dataset and provide exactly 4 key insights as bullet points.
-Focus on: top products, regional performance, trends, and recommendations.
-
-Dataset sample:
+                    prompt = f"""You are a senior data analyst. Analyze this dataset and give exactly 4 bullet point insights.
+Focus on top products, regional performance, trends, and recommendations.
+Dataset:
 {sample}
-
-Total rows: {len(df)}
-Total sales: {df[sales_col].sum() if sales_col else 'N/A'}
-
-Provide 4 bullet points. Keep each insight short and actionable."""
-                    genai.configure(api_key=GEMINI_API_KEY)
+Rows: {len(df)} | Total sales: {df[sales_col].sum() if sales_col else 'N/A'}
+Keep each insight short and actionable."""
                     model = genai.GenerativeModel("gemini-2.0-flash")
                     response = model.generate_content(prompt)
                     st.session_state.ai_summary = response.text
@@ -203,21 +307,20 @@ Provide 4 bullet points. Keep each insight short and actionable."""
     """, unsafe_allow_html=True)
 
     # ── Charts Row 1 ──
-    st.markdown("<div class='section-label'>Charts</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-label'>📈 Charts</div>", unsafe_allow_html=True)
     ch1, ch2 = st.columns(2)
 
     with ch1:
         if product_col and sales_col:
             all_products = (
                 df.groupby(product_col)[sales_col]
-                .sum()
-                .reset_index()
+                .sum().reset_index()
                 .sort_values(sales_col, ascending=True)
             )
             fig = px.bar(
                 all_products, x=sales_col, y=product_col,
                 orientation="h",
-                title=f"🧊 Products by Sales ({len(all_products)} total)",
+                title=f"🧊 All Products by Sales ({len(all_products)} products)",
                 color=sales_col,
                 color_continuous_scale=BLUE_SCALE
             )
@@ -266,9 +369,8 @@ Provide 4 bullet points. Keep each insight short and actionable."""
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Full Data Table ────────────────────────────────────────────────────────
-    st.markdown("<div class='section-label'>Full Data Table</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-label'>📋 Full Data Table</div>", unsafe_allow_html=True)
 
-    # Table search
     search = st.text_input("🔍 Search in table", placeholder="Type to search any value...")
     if search:
         mask = df.astype(str).apply(lambda col: col.str.contains(search, case=False)).any(axis=1)
@@ -276,7 +378,7 @@ Provide 4 bullet points. Keep each insight short and actionable."""
     else:
         table_df = df
 
-    st.markdown(f"<div style='font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:8px;'>Showing {len(table_df)} of {len(df)} rows</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:8px;'>Showing <b style='color:#38bdf8'>{len(table_df)}</b> of {len(df)} rows</div>", unsafe_allow_html=True)
 
     st.dataframe(
         table_df.reset_index(drop=True),
@@ -285,12 +387,11 @@ Provide 4 bullet points. Keep each insight short and actionable."""
         height=500
     )
 
-    # ── Download Button ──
     csv = table_df.to_csv(index=False).encode("utf-8")
     st.download_button(
         label="⬇️ Download Filtered Data as CSV",
         data=csv,
-        file_name="insightflow_filtered_data.csv",
+        file_name="insightflow_data.csv",
         mime="text/csv"
     )
 
